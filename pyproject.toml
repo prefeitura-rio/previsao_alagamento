@@ -9,14 +9,15 @@ packages = [{include = "previsao_alagamento"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-basedosdados = "2.0.0b5"
+basedosdados = { version = "2.0.0b5", python = ">=3.9,<3.11" }
 pandas = "2.0.3"
 matplotlib = "3.5.1"
-numpy = "1.22.0"
+numpy = "1.23.2"
 scikit-learn = "1.2.1"
 pylint = "^2.12.2"
 flake8 = "^4.0.1"
 black = "20.8b1"
+h3 = "^3.7.6"
 
 
 [build-system]
