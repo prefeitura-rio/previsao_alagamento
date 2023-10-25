@@ -59,7 +59,15 @@ WITH
                         a.id, b.id, b.estacao,
                         ST_DISTANCE(a.geom, b.geom)
                         )
-                      h3_media.estacoes, <> b.id
+                        ORDER BY ST_DISTANCE(a.geom, b.geom)
+                    ) AS ar
+                FROM (SELECT id, geom FROM centroid_h3) a
+                CROSS JOIN(
+                    SELECT id, estacao, geom
+                    FROM estacoes_pluviometricas
+                    WHERE geom is not null
+                ) b
+            WHERE a.id <> b.id
             GROUP BY a.id
             ) ab
             CROSS JOIN UNNEST(ab.ar) s
@@ -91,6 +99,7 @@ WITH
 
     SELECT
         h3_media.id_h3,
+        h3_media.estacoes,
         h3_media.chuva_15min AS chuva_15min,
         h3_media.chuva_1h AS chuva_1h,
         h3_media.chuva_4h AS chuva_4h,
