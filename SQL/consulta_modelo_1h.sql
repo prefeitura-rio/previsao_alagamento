@@ -1,4 +1,4 @@
-CREATE TABLE `rj-cor-dev.clima_pluviometro.main_table_fields_1H` AS
+CREATE OR REPLACE TABLE `rj-cor-dev.clima_pluviometro.main_table_fields_1H` AS
 WITH
     alertario AS ( 
     SELECT
@@ -95,11 +95,12 @@ WITH
     FROM h3_chuvas
     WHERE ranking < 4
     GROUP BY id_h3, data_update
-    )
+    ),
     media_agrupada AS (
         SELECT
             id_h3,
             data_update,
+            chuva_15min,
             chuva_1h,
             chuva_4h,
             chuva_24h,
@@ -131,6 +132,7 @@ WITH
     SELECT
         media_agrupada.id_h3,
         media_agrupada.estacoes,
+        media_agrupada.chuva_15min,
         media_agrupada.chuva_1h AS chuva_1h,
         media_agrupada.chuva_4h AS chuva_4h,
         media_agrupada.chuva_24h AS chuva_24h,
@@ -154,7 +156,8 @@ WITH
     ) as media_agrupada
     LEFT JOIN `rj-cor-dev.clima_pluviometro.ocorrencias_alagamento` AS o
         ON o.id_h3 = media_agrupada.id_h3 AND
-        TIMESTAMP(media_agrupada.data_update, 'UTC-0') BETWEEN o.data_inicio AND o.data_fim
+        TIMESTAMP(media_agrupada.data_update, 'UTC-2') BETWEEN o.data_inicio AND o.data_fim
     WHERE ranking_hora = 1
+    AND media_agrupada.data_update >= DATETIME('2015-1-1 00:00:00')
     ORDER BY data_hora
     ;
