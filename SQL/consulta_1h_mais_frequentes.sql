@@ -155,7 +155,7 @@ WITH
         o.latitude AS alagamento_lat,
         o.longitude AS alagamento_long,
         o.gravidade AS gravidade_alagamento
-
+        o.id_ocorrencia
     FROM (
         SELECT 
             *,
@@ -163,10 +163,14 @@ WITH
         FROM
             media_agrupada
     ) as media_agrupada
-    LEFT JOIN `rj-cor-dev.clima_pluviometro.ocorrencias_alagamento` AS o
+    LEFT JOIN 
+        ()`rj-cor-dev.clima_pluviometro.ocorrencias_alagamento` AS o
         ON (o.id_h3 = media_agrupada.id_h3 AND
-        TIMESTAMP(media_agrupada.data_update, 'UTC-2') BETWEEN o.data_inicio AND o.data_fim)
+        TIMESTAMP(DATETIME_TRUNC(media_agrupada.data_update, HOUR), 'UTC-2') BETWEEN 
+        TIMESTAMP_TRUNC(o.data_inicio, HOUR) AND TIMESTAMP_TRUNC(o.data_fim, HOUR)
     WHERE ranking_hora = 1
     AND media_agrupada.data_update >= DATETIME('2015-1-1 00:00:00')
+    AND (TIMESTAMP(DATETIME_TRUNC(media_agrupada.data_update, HOUR), 'UTC-2') = TIMESTAMP_TRUNC(o.data_inicio, HOUR)
+    OR o.data_inicio IS NULL)
     ORDER BY data_hora
     ;
