@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{include = "previsao_alagamento"}]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.11"
+python = ">=3.9,<3.9.7 || >3.9.7,<3.11"
 basedosdados = "2.0.0b5"
 matplotlib = "3.5.1"
 numpy = "1.23.2"
@@ -20,6 +20,9 @@ h3 = "^3.7.6"
 statsmodels = "0.14.0"
 jupyter = "^1.0.0"
 pandas = "^2.1.2"
+streamlit = "^1.28.2"
+folium = "^0.15.0"
+streamlit-folium = "^0.15.1"
 
 
 [build-system]
