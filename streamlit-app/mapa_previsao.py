@@ -3,17 +3,18 @@ import pandas as pd
 import numpy as np
 from streamlit_folium import folium_static
 import folium
+from folium.features import DivIcon
 import basedosdados
 import h3
 from joblib import load
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import (accuracy_score, r2_score, mean_squared_error, precision_score, recall_score,
-                             confusion_matrix, matthews_corrcoef)
+from sklearn.metrics import (confusion_matrix, fbeta_score, auc, precision_recall_curve)
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
+
 
 # Set the page title
 st.set_page_config(page_title='Previsor de Alagamentos')
@@ -61,18 +62,16 @@ if uploaded_file is not None:
 
     resultados = pd.DataFrame(columns=['Métrica', 'Modelo Baseline', 'Seu Modelo'])
 
-    resultados.loc[len(resultados)] = ("Acurácia: ", accuracy_score(y, y_pred_rf),
-                                       accuracy_score(y, main_table['predicted']))
-    resultados.loc[len(resultados)] = ("R²: ", r2_score(y, y_pred_rf),
-                                       r2_score(y, main_table['predicted']))
-    resultados.loc[len(resultados)] = ("Erro: ", mean_squared_error(y, y_pred_rf),
-                                       mean_squared_error(y, main_table['predicted']))
-    resultados.loc[len(resultados)] = ("Precisão: ", precision_score(y, y_pred_rf),
-                                       precision_score(y, main_table['predicted']))
-    resultados.loc[len(resultados)] = ("Recall: ", recall_score(y, y_pred_rf),
-                                       recall_score(y, main_table['predicted']))
-    resultados.loc[len(resultados)] = ("MCC: ", matthews_corrcoef(y, y_pred_rf),
-                                       matthews_corrcoef(y, main_table['predicted']))
+    resultados.loc[len(resultados)] = ("F0.5: ", fbeta_score(y, y_pred_rf, beta=0.5),
+                                       fbeta_score(y, main_table['predicted'], beta=0.5))
+    recall_rf, precision_rf, th_rf = precision_recall_curve(y, y_pred_rf)
+    recall, precision, th = precision_recall_curve(y, main_table['predicted'])
+    resultados.loc[len(resultados)] = ("AUC: ", auc(recall_rf, precision_rf), auc(recall, precision))
+    resultados.loc[len(resultados)] = ("Matriz de Confusão: ", (confusion_matrix(y, y_pred_rf)),
+                                       (confusion_matrix(y, main_table['predicted'])))
+
+    st.subheader('Métricas')
+    st.write(resultados)
 
     wrong_predictions = {}
     for idx, row in main_table.iterrows():
@@ -99,7 +98,7 @@ if uploaded_file is not None:
             color = 'black'
         elif value[0]:
             color = 'blue'
-        else :
+        else:
             color = 'red'
         polygon = folium.Polygon(locations=polygon_coord, color=color, fill=True, fill_color=color, fill_opacity=0.1)
         polygon.add_child(folium.Popup(f"Predição erradas: {value[0]}, Baseline {value[1]}"))
@@ -107,13 +106,30 @@ if uploaded_file is not None:
 
     st.subheader('Mapa de alagamentos no Rio de Janeiro')
     folium_static(mapa)
-    st.caption("""Círculos vermelhos: alagamentos não previstos por nenhum modelo.
-                  Círculos verdes: alagamentos previstos por ambos modelos.
-                  Círculos azuis: alagamentos previstos por seu modelo.
-                  Círculos amarelos: alagamentos previstos pelo modelo baseline.
-                  Hexágonos: alagamentos previstos onde não ouve alagamento.
-                  Hexágonos azuis: alagamentos previstos erroneamente pelo modelo baseline.
-                  Hexágonos pretos: alagamentos previstos erroneamente por ambos os modelos.
-                  Hexágonos vermelhos: alagamentos previstos erroneamente pelo seu modelo.""")
 
-    st.write(resultados)
+    html_code = """
+      <style>
+        .circle {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          display: inline-block;
+        }
+      </style>  
+    <p>
+    <span class="circle" style="background-color: green;"></span>: Alagamentos previstos por ambos modelos.
+      </p>
+      <p>
+    <span class="circle" style="background-color: red;"></span>: Alagamentos não previstos por nenhum modelo.
+      </p>
+      <p>
+    <span class="circle" style="background-color: blue;"></span>: Alagamentos previstos por seu modelo.
+      </p>
+      <p>
+    <span class="circle" style="background-color: yellow;"></span>: Alagamentos previstos pelo modelo baseline.
+      </p>
+    """
+
+    st.markdown(html_code, unsafe_allow_html=True)
+
+
