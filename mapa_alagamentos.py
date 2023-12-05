@@ -15,13 +15,6 @@ for idx, row in alagamento_df.iterrows():
         folium.Circle(location=[row['latitude'], row['longitude']],
                           radius=10, color='green', fill=True).add_to(mapa)
         
-hex = alagamento_df['id_h3'].value_counts()
 
-hex = hex[0:50]
-
-for row in hex.index:
-    polygon = folium.Polygon(locations=h3.h3_to_geo_boundary(row), color='blue', fill=True, fill_color='blue', fill_opacity=0.1)
-    polygon.add_to(mapa)
-
-mapa.save('mapa_alagamentos.html')
+mapa.save('mapa_alagamentos2.html')
 

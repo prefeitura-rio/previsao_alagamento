@@ -44,13 +44,19 @@ main_table.drop(columns=['data_hora', 'estacao_ano', 'alagamento_fim',
 X = main_table.drop(columns=['target'])
 y = main_table['target']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5, random_state=42)
+X_train, X_test, y_train, y_test, train_idx, test_idx = train_test_split(X, y, range(len(X)), test_size=0.15, random_state=42)
+
+main_table = pd.read_csv('csvs/main_table_mult_hexag.csv')
+
+main_table = main_table.iloc[test_idx]
 
 rf = RandomForestClassifier(n_estimators=10, criterion='entropy')
 rf.fit(X_train, y_train)
 
 y_pred_rf = rf.predict(X_test)
+main_table['predicted'] = y_pred_rf
+
+main_table.to_csv('csvs/teste_streamlit.csv')
 
 print("Accuracy: ", accuracy_score(y_test, y_pred_rf))
 print("R²: ", r2_score(y_test, y_pred_rf))

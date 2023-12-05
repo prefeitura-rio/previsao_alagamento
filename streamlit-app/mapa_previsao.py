@@ -97,9 +97,9 @@ if uploaded_file is not None:
         if value[1] and value[0]:
             color = 'black'
         elif value[0]:
-            color = 'blue'
-        else:
             color = 'red'
+        else:
+            color = 'blue'
         polygon = folium.Polygon(locations=polygon_coord, color=color, fill=True, fill_color=color, fill_opacity=0.1)
         polygon.add_child(folium.Popup(f"Predição erradas: {value[0]}, Baseline {value[1]}"))
         polygon.add_to(mapa)
@@ -115,19 +115,36 @@ if uploaded_file is not None:
           border-radius: 50%;
           display: inline-block;
         }
+        .hex {
+          width: 10px;
+          height: 10px; /* Height of the hexagon (sqrt(3)/2 * width) */
+          background-color: #3498db; /* Hexagon color */
+          display: inline-block;
+          margin-right: 5px; /* Adjust as needed */
+          clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+        .row {
+          display: flex;
+          font-size: 0.8em;
+        }
+
+        .column {
+          flex: 50%;
+        }
       </style>  
-    <p>
-    <span class="circle" style="background-color: green;"></span>: Alagamentos previstos por ambos modelos.
-      </p>
-      <p>
-    <span class="circle" style="background-color: red;"></span>: Alagamentos não previstos por nenhum modelo.
-      </p>
-      <p>
-    <span class="circle" style="background-color: blue;"></span>: Alagamentos previstos por seu modelo.
-      </p>
-      <p>
-    <span class="circle" style="background-color: yellow;"></span>: Alagamentos previstos pelo modelo baseline.
-      </p>
+    <div class="row">
+    <div class="column">
+    <span class="circle" style="background-color: green;"></span>: Alagamentos previstos por ambos modelos.<br>
+    <span class="circle" style="background-color: red;"></span>: Alagamentos não previstos por nenhum modelo.<br>
+    <span class="circle" style="background-color: blue;"></span>: Alagamentos previstos por seu modelo.<br>
+    <span class="circle" style="background-color: yellow;"></span>: Alagamentos previstos pelo modelo baseline.<br>
+    </div>
+    <div class="column">
+    <span class="hex" style="background-color: black;"></span>: Falso positivo no Hexágono (previsto por ambos modelos).<br>
+    <span class="hex" style="background-color: red;"></span>: Falso positivo no Hexágono (previsto por seu modelo).<br>
+    <span class="hex" style="background-color: blue;"></span>: Falso positivo no Hexágono (previsto pelo modelo baseline).<br>
+    </div>
+    </div >
     """
 
     st.markdown(html_code, unsafe_allow_html=True)
